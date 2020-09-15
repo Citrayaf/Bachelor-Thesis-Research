@@ -1,25 +1,26 @@
 clear all
 clc
 
-Modulasi = 2;
+
+Modulasi = 4;
 indeks_modulasi=log2(Modulasi);
 
-frame= 25;
+frame= 500;
+
 iter_LDPC=5;
 
 load Hs1-2(4-9){1-60}.mat
 load Gs1-2(4-9){1-60}.mat
 
-
-SNR=0;
-
 [p n] = size(H);
-k = n-p;
+k = n-p; %information
+
+SNR=0:1:5;
 
 
-% for ii=1:length(SNR)
-    snr=10.^(SNR/10);
-%     snr=10.^(SNR(ii)/10);
+for ii=1:length(SNR)
+%     snr=10.^(SNR/10);
+    snr=10.^(SNR(ii)/10);
     
     sigma = sqrt(1./(2*snr));
     
@@ -30,7 +31,10 @@ k = n-p;
         codeword = mod(bit_informasi*G,2); 
 
         
-        x=1-codeword*2;
+        code=mapper(codeword,'qpsk');
+        
+        %make the dimension same with the noise dimension
+        x = code.';
         
         h=1;
         
@@ -38,14 +42,15 @@ k = n-p;
         
         y=h*x+noise;
         
-        u=(2/sigma^2)*real(y);%soft Demapper
+
+        u=Softdemapper_manualQ(y,sigma); 
         
 %       Decoding LDPC
         Lrji= zeros(p,n);
         
-        [error,Lrji,hatb, iter] = decode_LDPC_2310(Lrji,u,H,iter_LDPC,bit_informasi,k);
+        [error,Lrji,hatb, iter] = decode_LDPC_2310(Lrji,u,H,iter_LDPC,bit_informasi,k); %SPA
                      
-                       
+%         [error,Lrji,hatb, iter] = decode_LDPC_MinSum(Lrji,u,H,iter_LDPC,bit_informasi,k); %Min-Sum               
 
         % fprintf('frame =%g, ber=%d\n', jj, ber);
         fprintf('frame =%g, ber=%d, iter=%d\n ', i, error, iter);
@@ -56,9 +61,9 @@ k = n-p;
     
     ber=jum_error/(k*frame);
     
-%     berplot(ii)=ber;
+    berplot(ii)=ber;
     
-% end
+end
 
-% semilogy(SNR,berplot,'-b*','linewidth',1)
+semilogy(SNR,berplot,'-*','linewidth',1)
 
