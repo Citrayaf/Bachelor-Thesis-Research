@@ -54,9 +54,10 @@ k = n-p;
 %       IA_ch = 0.6613;
 
           
-        EXIT_CND_DVB_1_2(IA_ch);
-        hold on;
-        EXIT_VND_DVB_1_2(IA_ch);
+        EXIT_LDPC_VND(IA_ch,H);
+        hold on
+        EXIT_LDPC_CND(IA_ch, H);
+
         axis([0 1 0 1]);
           
         FigW=6; 
